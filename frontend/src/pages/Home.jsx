@@ -30,14 +30,15 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white">
-      <div className="bg-black/30 min-h-screen">
-        <Header profileImage={profileImage} loggedUser={loggedUser} />
-        <main className="max-w-6xl mx-auto px-4 py-8">
-          <Dashboard />
-        </main>
-      </div>
-    </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black  text-gray-900">
+  <div className=" min-h-screen shadow-inner">
+    <Header profileImage={profileImage} loggedUser={loggedUser} />
+    <main className="max-w-6xl mx-auto px-4 py-8">
+      <Dashboard />
+    </main>
+  </div>
+</div>
+
   );
 };
 
