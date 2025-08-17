@@ -43,7 +43,7 @@ const CreateQuiz = () => {
   try {
     // 1️⃣ POST request with 90s timeout
     const postTimeout = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Server is busy. Please try again later.')), 90000)
+      setTimeout(() => reject(new Error('Server is busy. Please try again later.')), 60000)
     );const BASE_URL = import.meta.env.VITE_BASE_URL;
 
     const res = await Promise.race([
