@@ -16,7 +16,9 @@ const Login = () => {
     e.preventDefault();
     console.log('Login Data:', formData);
     try{
-    const res=await axios.post("http://localhost:8080/auth/login",formData)
+      const BASE_URL = import.meta.env.VITE_BASE_URL;
+
+    const res=await axios.post(`${BASE_URL}auth/login`,formData)
     const { jwToke, email, name } = res.data;
     localStorage.setItem("token", res.data.jwToke);
 localStorage.setItem("user", name);

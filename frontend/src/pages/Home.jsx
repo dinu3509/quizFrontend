@@ -17,8 +17,9 @@ const Home = () => {
     setLoggedUser(user);
 
     if (token) {
+      const BASE_URL = import.meta.env.VITE_BASE_URL;
       axios
-        .get("http://localhost:8080/profile/image", {
+        .get(`${BASE_URL}profile/image`, {
           headers: { Authorization: token },
         })
         .then((res) => {

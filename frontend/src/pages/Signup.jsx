@@ -21,7 +21,8 @@ const Signup = () => {
         return handleError('Name,Email and Password are required.')
     }
     try{
-        const res = await axios.post('http://localhost:8080/auth/signup', formData);
+      const BASE_URL = import.meta.env.VITE_BASE_URL;
+        const res = await axios.post(`${BASE_URL}auth/signup`, formData);
     handleSuccess("Signup successful");
     setTimeout(() => {
       navigate('/login');

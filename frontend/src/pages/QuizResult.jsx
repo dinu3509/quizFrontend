@@ -12,7 +12,8 @@ const QuizResult = () => {
     const fetchResult = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get(`http://localhost:8080/results/${id}`, {
+        const BASE_URL = import.meta.env.VITE_BASE_URL;
+        const res = await axios.get(`${BASE_URL}results/${id}`, {
           headers: { Authorization: token },
         });
         console.log("Result:", res.data[0]);

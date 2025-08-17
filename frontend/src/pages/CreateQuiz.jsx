@@ -44,10 +44,10 @@ const CreateQuiz = () => {
     // 1️⃣ POST request with 90s timeout
     const postTimeout = new Promise((_, reject) =>
       setTimeout(() => reject(new Error('Server is busy. Please try again later.')), 90000)
-    );
+    );const BASE_URL = import.meta.env.VITE_BASE_URL;
 
     const res = await Promise.race([
-      axios.post('http://localhost:8080/quiz/createquiz', data, {
+      axios.post(`${BASE_URL}quiz/createquiz`, data, {
         headers: { Authorization: token },
       }),
       postTimeout
@@ -68,9 +68,9 @@ const CreateQuiz = () => {
           const getTimeout = new Promise((_, reject) =>
             setTimeout(() => reject(new Error('Server is busy fetching questions.')), 10000)
           );
-
+          const BASE_URL = import.meta.env.VITE_BASE_URL;
           const genRes = await Promise.race([
-            axios.get(`http://localhost:8080/writequiz/${quizId}`, {
+            axios.get(`${BASE_URL}writequiz/${quizId}`, {
               headers: { Authorization: localStorage.getItem(`quizToken_${quizId}`) },
             }),
             getTimeout

@@ -17,7 +17,8 @@ const History = () => {
     const fetchHistory = async () => {
       try {
         const token = localStorage.getItem('token')
-        const res = await axios.get("http://localhost:8080/history/", {
+        const BASE_URL = import.meta.env.VITE_BASE_URL;
+        const res = await axios.get(`${BASE_URL}history/`, {
           headers: {
             Authorization: token
           }

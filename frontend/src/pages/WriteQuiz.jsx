@@ -37,7 +37,8 @@ const WriteQuiz = () => {
     const checkSubmission = async () => {
       try {
         const quizToken = localStorage.getItem(`quizToken_${id}`);
-        const res = await axios.get(`http://localhost:8080/writequiz/${id}/check-submission`, {
+        const BASE_URL = import.meta.env.VITE_BASE_URL;
+        const res = await axios.get(`${BASE_URL}writequiz/${id}/check-submission`, {
           headers: { Authorization: quizToken },
         });
 
@@ -65,7 +66,8 @@ const WriteQuiz = () => {
       try {
         setLoading(true);
         const quizToken = localStorage.getItem(`quizToken_${id}`);
-        const res = await axios.get(`http://localhost:8080/writequiz/${id}`, {
+        const BASE_URL = import.meta.env.VITE_BASE_URL;
+        const res = await axios.get(`${BASE_URL}writequiz/${id}`, {
           headers: { Authorization: quizToken }
         });
 
@@ -142,7 +144,8 @@ const WriteQuiz = () => {
 
     try {
       const quizToken = localStorage.getItem(`quizToken_${id}`);
-      await axios.post('http://localhost:8080/writequiz/result', {
+      const BASE_URL = import.meta.env.VITE_BASE_URL;
+      await axios.post(`${BASE_URL}writequiz/result`, {
         quizId: id,
         score: correctCount,
         wrong: attempted - correctCount,

@@ -16,7 +16,8 @@ const Profile = () => {
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:8080/profile/info", {
+        const BASE_URL = import.meta.env.VITE_BASE_URL;
+        const res = await axios.get(`${BASE_URL}profile/info`, {
           headers: { Authorization: token },
         });
 
@@ -55,7 +56,8 @@ const Profile = () => {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.post("http://localhost:8080/profile/info", formData, {
+      const BASE_URL = import.meta.env.VITE_BASE_URL;
+      const res = await axios.post(`${BASE_URL}profile/info`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: token,
