@@ -39,19 +39,20 @@ const CreateQuiz = () => {
   };
 
   const token = localStorage.getItem('token');
-
+  console.log(token)
   try {
     // 1️⃣ POST request with 90s timeout
     const postTimeout = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Server is busy. Please try again later.')), 60000)
+      setTimeout(() => reject(new Error('Server is busy. Please try again later.')), 90000)
     );const BASE_URL = import.meta.env.VITE_BASE_URL;
-
+    console.log(data);
     const res = await Promise.race([
       axios.post(`${BASE_URL}quiz/createquiz`, data, {
         headers: { Authorization: token },
       }),
       postTimeout
     ]);
+    console.log(res)
 
     console.log('Quiz Created:', res.data);
     localStorage.setItem(`quizToken_${res.data.quiz._id}`, res.data.quizToken);
