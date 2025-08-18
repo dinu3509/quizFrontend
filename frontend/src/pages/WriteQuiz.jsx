@@ -33,97 +33,110 @@ const WriteQuiz = () => {
     setSelected(prev => ({ ...prev, [questionIndex]: selectedOption }));
   };
 
-  useEffect(() => {
-    const checkSubmission = async () => {
-      try {
-        const quizToken = localStorage.getItem(`quizToken_${id}`);
-        const BASE_URL = import.meta.env.VITE_BASE_URL;
-        const res = await axios.get(`${BASE_URL}writequiz/${id}/check-submission`, {
-          headers: { Authorization: quizToken },
-        });
+ useEffect(() => {
+  const checkSubmission = async () => {
+    try {
+      const quizToken = localStorage.getItem(`quizToken_${id}`);
+      console.log('📌 checkSubmission - quizToken:', quizToken);
+      console.log('📌 checkSubmission - quizId:', id);
 
-        if (res.data.submitted) {
-          setAlreadySubmitted(true);
-          navigate('/quiz-submitted', {
-            state: { message: 'You already submitted this quiz.' }
-          });
-        } else {
-          setCanAttempt(true);
-        }
-      } catch (err) {
-        console.error('Failed to check submission:', err);
-      } finally {
-        setLoading(false);
+      const BASE_URL = import.meta.env.VITE_BASE_URL;
+      console.log('📌 checkSubmission - BASE_URL:', BASE_URL);
+
+      const res = await axios.get(`${BASE_URL}writequiz/${id}/check-submission`, {
+        headers: { Authorization: quizToken },
+      });
+
+      console.log('📌 checkSubmission response:', res.data);
+
+      if (res.data.submitted) {
+        setAlreadySubmitted(true);
+        navigate('/quiz-submitted', {
+          state: { message: 'You already submitted this quiz.' }
+        });
+      } else {
+        setCanAttempt(true);
       }
-    };
-    checkSubmission();
-  }, [id, navigate]);
+    } catch (err) {
+      console.error('❌ checkSubmission failed:', err.response || err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  checkSubmission();
+}, [id, navigate]);
 
-  useEffect(() => {
-    if (!canAttempt) return;
 
-    const fetchQuiz = async () => {
-      try {
-        setLoading(true);
-        const quizToken = localStorage.getItem(`quizToken_${id}`);
-        const BASE_URL = import.meta.env.VITE_BASE_URL;
-        const res = await axios.get(`${BASE_URL}writequiz/${id}`, {
-          headers: { Authorization: quizToken }
+useEffect(() => {
+  if (!canAttempt) return;
+
+  const fetchQuiz = async () => {
+    try {
+      setLoading(true);
+
+      const quizToken = localStorage.getItem(`quizToken_${id}`);
+      console.log('📌 fetchQuiz - quizToken:', quizToken);
+      console.log('📌 fetchQuiz - quizId:', id);
+
+      const BASE_URL = import.meta.env.VITE_BASE_URL;
+      console.log('📌 fetchQuiz - BASE_URL:', BASE_URL);
+
+      const res = await axios.get(`${BASE_URL}writequiz/${id}`, {
+        headers: { Authorization: quizToken }
+      });
+
+      console.log('📌 fetchQuiz response:', res.data);
+
+      const quizData = res.data.quiz;
+
+      // Shuffle options for each question
+      const shuffledQuestions = quizData.questions.map(q => {
+        const opts = [
+          { text: q.option1, isCorrect: q.option1 === q.answer },
+          { text: q.option2, isCorrect: q.option2 === q.answer },
+          { text: q.option3, isCorrect: q.option3 === q.answer },
+          { text: q.option4, isCorrect: q.option4 === q.answer },
+        ];
+        return {
+          ...q,
+          options: shuffleArray(opts)
+        };
+      });
+
+      setQuestions(shuffledQuestions);
+      setAnswers(shuffledQuestions.map(q => q.options.find(opt => opt.isCorrect).text));
+
+      const initialSelected = {};
+      shuffledQuestions.forEach((_, index) => initialSelected[index] = null);
+      setSelected(initialSelected);
+
+      const decoded = jwtDecode(quizToken);
+      const expiry = decoded.exp * 1000;
+      const remaining = Math.max(0, Math.floor((expiry - Date.now()) / 1000));
+      setTimeLeft(remaining);
+
+      const interval = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            handleSubmit();
+            return 0;
+          }
+          return prev - 1;
         });
+      }, 1000);
 
-        const quizData = res.data.quiz;
+      return () => clearInterval(interval);
+    } catch (err) {
+      console.error('❌ fetchQuiz failed:', err.response || err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        // Shuffle options for each question
-        const shuffledQuestions = quizData.questions.map(q => {
-          const opts = [
-            { text: q.option1, isCorrect: q.option1 === q.answer },
-            { text: q.option2, isCorrect: q.option2 === q.answer },
-            { text: q.option3, isCorrect: q.option3 === q.answer },
-            { text: q.option4, isCorrect: q.option4 === q.answer },
-          ];
-          return {
-            ...q,
-            options: shuffleArray(opts) // shuffled options
-          };
-        });
+  fetchQuiz();
+}, [id, canAttempt]);
 
-        setQuestions(shuffledQuestions);
-
-        // Store correct answers for scoring
-        setAnswers(shuffledQuestions.map(q => q.options.find(opt => opt.isCorrect).text));
-
-        // Initialize selected
-        const initialSelected = {};
-        shuffledQuestions.forEach((_, index) => initialSelected[index] = null);
-        setSelected(initialSelected);
-
-        // Timer
-        const decoded = jwtDecode(quizToken);
-        const expiry = decoded.exp * 1000;
-        const remaining = Math.max(0, Math.floor((expiry - Date.now()) / 1000));
-        setTimeLeft(remaining);
-
-        const interval = setInterval(() => {
-          setTimeLeft(prev => {
-            if (prev <= 1) {
-              clearInterval(interval);
-              handleSubmit();
-              return 0;
-            }
-            return prev - 1;
-          });
-        }, 1000);
-
-        return () => clearInterval(interval);
-      } catch (err) {
-        console.error('Failed to fetch quiz', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchQuiz();
-  }, [id, canAttempt]);
 
   const handleSubmit = async () => {
     if (submitted || alreadySubmitted) return;
@@ -177,8 +190,8 @@ const WriteQuiz = () => {
   if (loading) return <div className="text-white text-center mt-20">Loading quiz...</div>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white flex justify-center p-6">
-      <div className="w-full max-w-screen-2xl bg-white text-gray-900 shadow-2xl rounded-2xl p-8 space-y-8">
+    <div className="min-h-screen overflow-y-auto bg-gray-50 text-gray-900 flex justify-center p-4 sm:p-6">
+      <div className="w-full max-w-lg sm:max-w-2xl bg-white shadow-2xl rounded-2xl p-4 sm:p-8 space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-indigo-600">{topic} Quiz</h2>
           {timeLeft !== null && (
